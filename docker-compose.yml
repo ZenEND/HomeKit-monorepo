@@ -1,0 +1,64 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: homekit-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-homekit}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-homekit}
+      POSTGRES_DB: ${POSTGRES_DB:-homekit}
+    ports:
+      - '5432:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-homekit} -d ${POSTGRES_DB:-homekit}']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: api/Dockerfile
+    container_name: homekit-api
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      PORT: ${PORT:-3000}
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: ${DB_USER:-homekit}
+      DB_PASSWORD: ${DB_PASSWORD:-homekit}
+      DB_NAME: ${DB_NAME:-homekit}
+      CORS_ORIGIN: http://localhost:5173
+    ports:
+      - '3000:3000'
+    volumes:
+      - ./api:/app/api
+      - /app/node_modules
+      - /app/api/node_modules
+    command: pnpm --filter api start:dev
+
+  web:
+    build:
+      context: .
+      dockerfile: web/Dockerfile
+    container_name: homekit-web
+    restart: unless-stopped
+    depends_on:
+      - api
+    environment:
+      VITE_API_URL: http://localhost:3000
+    ports:
+      - '5173:5173'
+    volumes:
+      - ./web:/app/web
+      - /app/node_modules
+      - /app/web/node_modules
+    command: pnpm --filter web dev --host
+
+volumes:
+  pgdata:
