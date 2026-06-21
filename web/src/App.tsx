@@ -11,13 +11,11 @@ const navItems = [
   { to: '/storage', key: 'nav.storage' },
   { to: '/games', key: 'nav.games' },
   { to: '/f1', key: 'nav.f1' },
+  { to: '/development', key: 'nav.development' },
   { to: '/parties', key: 'nav.parties' },
   { to: '/plans', key: 'nav.plans' },
   { to: '/food', key: 'nav.food' },
   { to: '/invite', key: 'nav.invite' },
-  { to: '/roadmap', key: 'nav.roadmap' },
-  { to: '/worktree', key: 'nav.worktree' },
-  { to: '/components', key: 'nav.components' },
   { to: '/login', key: 'nav.login' },
 ];
 

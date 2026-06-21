@@ -18,12 +18,17 @@ const en: Dictionary = {
   'nav.plans': 'Plans',
   'nav.food': 'Food',
   'nav.invite': 'Invite',
+  'nav.development': 'Development',
   'nav.roadmap': 'Roadmap',
   'nav.worktree': 'Work Tree',
   'nav.components': 'Components',
   'nav.login': 'Login',
 
   'language.label': 'Language',
+
+  'development.title': 'Development Hub',
+  'development.subtitle':
+    'Internal project pages for planning, implementation choices, and UI component checks.',
 
   'roadmap.title': 'HomeKit Roadmap',
   'roadmap.subtitle':
@@ -233,12 +238,17 @@ const ua: Dictionary = {
   'nav.plans': 'Плани',
   'nav.food': 'Їжа',
   'nav.invite': 'Запрошення',
+  'nav.development': 'Розробка',
   'nav.roadmap': 'Дорожня карта',
   'nav.worktree': 'Дерево робіт',
   'nav.components': 'Компоненти',
   'nav.login': 'Вхід',
 
   'language.label': 'Мова',
+
+  'development.title': 'Центр розробки',
+  'development.subtitle':
+    'Внутрішні сторінки проєкту для планування, вибору реалізації та перевірки UI-компонентів.',
 
   'roadmap.title': 'Дорожня карта HomeKit',
   'roadmap.subtitle':

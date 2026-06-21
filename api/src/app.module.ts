@@ -4,6 +4,7 @@ import { AppController } from './app.controller';
 import { DatabaseModule } from './database/database.module';
 import {UsersModule} from "./users/users.module";
 import {AuthModule} from "./auth/auth.module";
+import { AiModule } from './ai/ai.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import {AuthModule} from "./auth/auth.module";
     DatabaseModule,
     UsersModule,
     AuthModule,
+    AiModule
   ],
   controllers: [AppController],
 })

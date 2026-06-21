@@ -32,9 +32,14 @@ export function Games() {
           <h1 className="mt-3 text-display-sm font-semibold text-primary">{t('games.title')}</h1>
           <p className="mt-2 max-w-2xl text-md text-tertiary">{t('games.subtitle')}</p>
         </div>
-        <Button color="secondary" size="md" href="/roadmap">
-          {t('games.viewRoadmap')}
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button color="primary" size="md" href="/alias">
+            Play Alias
+          </Button>
+          <Button color="secondary" size="md" href="/roadmap">
+            {t('games.viewRoadmap')}
+          </Button>
+        </div>
       </header>
 
       <section className="flex flex-col gap-4">
