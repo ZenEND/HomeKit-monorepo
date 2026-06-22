@@ -62,12 +62,17 @@ const en: Dictionary = {
   'common.impact': 'impact',
   'common.effort': 'effort',
 
-  'home.title': 'Home Test',
-  'home.subtitle': 'Welcome to the HomeKit monorepo frontend.',
-  'home.counter': 'Counter',
-  'home.apiHealth': 'API Health',
-  'home.loading': 'Loading...',
-  'home.refresh': 'Refresh',
+  'home.eyebrow': 'Private home app',
+  'home.title': 'Everything for your home circle in one place.',
+  'home.subtitle':
+    'HomeKit keeps plans, games, files, food ideas, and invites behind a private login for people you trust.',
+  'home.login': 'Login',
+  'home.signUp': 'Sign up',
+  'home.scanQr': 'Scan QR',
+  'home.cardLabel': 'Protected by default',
+  'home.cardTitle': 'Your pages stay private',
+  'home.cardDescription':
+    'Login opens the main HomeKit workspace with storage, games, plans, invites, and development pages.',
 
   'games.coming': 'Coming Sep 2026',
   'games.title': 'Party Games',
@@ -282,12 +287,17 @@ const ua: Dictionary = {
   'common.impact': 'вплив',
   'common.effort': 'зусилля',
 
-  'home.title': 'Тест головної',
-  'home.subtitle': 'Ласкаво просимо до фронтенду монорепозиторію HomeKit.',
-  'home.counter': 'Лічильник',
-  'home.apiHealth': 'Стан API',
-  'home.loading': 'Завантаження...',
-  'home.refresh': 'Оновити',
+  'home.eyebrow': 'Приватний домашній застосунок',
+  'home.title': 'Усе для твого домашнього кола в одному місці.',
+  'home.subtitle':
+    'HomeKit тримає плани, ігри, файли, ідеї для їжі та запрошення за приватним входом для людей, яким ти довіряєш.',
+  'home.login': 'Увійти',
+  'home.signUp': 'Зареєструватися',
+  'home.scanQr': 'Сканувати QR',
+  'home.cardLabel': 'Приватність за замовчуванням',
+  'home.cardTitle': 'Твої сторінки залишаються закритими',
+  'home.cardDescription':
+    'Вхід відкриває основний простір HomeKit зі сховищем, іграми, планами, запрошеннями та сторінками розробки.',
 
   'games.coming': 'Очікується у вересні 2026',
   'games.title': 'Ігри для компанії',

@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { Mail01, Lock01 } from '@untitledui/icons';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/base/buttons/button';
 import { FormCheckbox } from '@/components/form/form-checkbox';
 import { FormInput } from '@/components/form/form-input';
@@ -13,8 +14,12 @@ import {
 
 export function Login() {
   const { t } = useTranslation();
+  const location = useLocation();
+  const navigate = useNavigate();
   const loginSchema = useMemo(() => createLoginSchema(t), [t]);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const from = (location.state as { from?: { pathname?: string; search?: string; hash?: string } } | null)?.from;
+  const redirectTo = `${from?.pathname ?? '/storage'}${from?.search ?? ''}${from?.hash ?? ''}`;
 
   const {
     control,
@@ -35,6 +40,8 @@ export function Login() {
     try {
       await new Promise((resolve) => setTimeout(resolve, 1200));
       console.log('Login submitted:', values);
+      window.localStorage.setItem('homekit.authToken', 'mock-authenticated');
+      navigate(redirectTo, { replace: true });
     } catch {
       setSubmitError(t('login.error'));
     }
@@ -91,7 +98,7 @@ export function Login() {
 
         <p className="mt-6 text-center text-sm text-tertiary">
           {t('login.noAccount')}{' '}
-          <Button href="#" color="link-color" size="sm">
+          <Button href="/sign-up" color="link-color" size="sm">
             {t('login.signUp')}
           </Button>
         </p>

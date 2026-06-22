@@ -9,7 +9,9 @@
     "build": "pnpm -r build",
     "build:api": "pnpm --filter api build",
     "build:web": "pnpm --filter web build",
-    "lint": "pnpm -r lint"
+    "lint": "pnpm -r lint",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "engines": {
     "node": ">=22"
@@ -21,20 +23,7 @@
       "@parcel/watcher"
     ]
   },
-  "dependencies": {
-    "@nestjs/jwt": "^11.0.2",
-    "@nestjs/passport": "^11.0.5",
-    "@nestjs/typeorm": "^11.0.2",
-    "bcrypt": "^6.0.0",
-    "class-transformer": "^0.5.1",
-    "passport": "^0.7.0",
-    "passport-jwt": "^4.0.1",
-    "passport-local": "^1.0.0",
-    "typeorm": "^1.0.0"
-  },
   "devDependencies": {
-    "@types/bcrypt": "^6.0.0",
-    "@types/passport-jwt": "^4.0.1",
-    "@types/passport-local": "^1.0.38"
+    "prettier": "^3.6.2"
   }
 }
