@@ -1,6 +1,10 @@
 import { Button } from '@/components/base/buttons/button';
 import { useTranslation } from '@/lib/i18n/use-translation';
 
+function openAuthPage(path: '/login' | '/sign-up') {
+  window.location.assign(path);
+}
+
 export function Home() {
   const { t } = useTranslation();
 
@@ -16,10 +20,10 @@ export function Home() {
         <p className="mt-5 max-w-2xl text-lg text-tertiary">{t('home.subtitle')}</p>
 
         <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-          <Button href="/login" size="xl" className="w-full sm:w-auto text-white!">
+          <Button size="xl" className="w-full sm:w-auto text-white!" onPress={() => openAuthPage('/login')}>
             {t('home.login')}
           </Button>
-          <Button href="/sign-up" color="secondary" size="xl" className="w-full sm:w-auto">
+          <Button color="secondary" size="xl" className="w-full sm:w-auto" onPress={() => openAuthPage('/sign-up')}>
             {t('home.signUp')}
           </Button>
           <Button href="/invite" color="tertiary" size="xl" className="w-full sm:w-auto">

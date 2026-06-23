@@ -1,10 +1,10 @@
-import { LanguageSwitcher } from "@/components/shared/language-switcher";
 import { cx } from "@/utils/cx";
 import { PropsWithChildren } from "react";
 import { NavLink } from "react-router-dom";
 import { Home02 } from '@untitledui/icons';
 import { FeaturedIcon } from '@/components/foundations/featured-icon/featured-icon';
 import { useTranslation } from "@/lib/i18n/use-translation";
+import { ProfileDropdown } from "@/components/shared/profile-dropdown";
 
 const navItems: Array<{ to: string; key: string; end?: boolean }> = [
     { to: '/storage', key: 'nav.storage' },
@@ -19,6 +19,7 @@ const navItems: Array<{ to: string; key: string; end?: boolean }> = [
 
 export function BaseLayout({ children }: PropsWithChildren) {
     const { t } = useTranslation();
+
     return (
         <div className="min-h-screen bg-secondary">
             <header className="sticky top-0 z-20 border-b border-secondary bg-primary/90 backdrop-blur-sm">
@@ -31,7 +32,9 @@ export function BaseLayout({ children }: PropsWithChildren) {
                                 <p className="hidden text-xs text-tertiary sm:block">{t('app.tagline')}</p>
                             </div>
                         </NavLink>
-                        <LanguageSwitcher />
+                        <div className="flex items-center gap-3">
+                            <ProfileDropdown />
+                        </div>
                     </div>
 
                     <nav className="-mx-1 flex items-center gap-1 overflow-x-auto pb-1">

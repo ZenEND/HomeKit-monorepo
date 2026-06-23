@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { Mail01, Lock01 } from '@untitledui/icons';
+import { ArrowLeft, Mail01, Lock01 } from '@untitledui/icons';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/base/buttons/button';
 import { FormCheckbox } from '@/components/form/form-checkbox';
@@ -11,13 +11,21 @@ import {
   createLoginSchema,
   type LoginFormValues,
 } from '@/lib/validations/login-schema';
+import { useUserStore } from '@/store/useUserStore';
+
+function openAuthPage(path: '/login' | '/sign-up') {
+  window.location.assign(path);
+}
 
 export function Login() {
   const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
+  const login = useUserStore((state) => state.login);
+  const register = useUserStore((state) => state.register);
   const loginSchema = useMemo(() => createLoginSchema(t), [t]);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const isSignUp = location.pathname === '/sign-up';
   const from = (location.state as { from?: { pathname?: string; search?: string; hash?: string } } | null)?.from;
   const redirectTo = `${from?.pathname ?? '/storage'}${from?.search ?? ''}${from?.hash ?? ''}`;
 
@@ -38,9 +46,12 @@ export function Login() {
     setSubmitError(null);
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1200));
-      console.log('Login submitted:', values);
-      window.localStorage.setItem('homekit.authToken', 'mock-authenticated');
+      if (isSignUp) {
+        await register(values.email, values.password);
+      } else {
+        await login(values.email, values.password);
+      }
+
       navigate(redirectTo, { replace: true });
     } catch {
       setSubmitError(t('login.error'));
@@ -50,12 +61,26 @@ export function Login() {
   return (
     <div className="flex min-h-[calc(100vh-8rem)] items-center justify-center px-4 py-12">
       <div className="w-full max-w-md rounded-2xl border border-secondary bg-primary p-8 shadow-xs">
+        <Button href="/" color="link-gray" size="sm" iconLeading={ArrowLeft} className="mb-6">
+          {t('login.backToLanding')}
+        </Button>
+
         <div className="mb-8 text-center">
-          <h1 className="text-display-xs font-semibold text-primary">{t('login.title')}</h1>
-          <p className="mt-2 text-md text-tertiary">{t('login.subtitle')}</p>
+          <h1 className="text-display-xs font-semibold text-primary">
+            {t(isSignUp ? 'login.signUpTitle' : 'login.title')}
+          </h1>
+          <p className="mt-2 text-md text-tertiary">
+            {t(isSignUp ? 'login.signUpSubtitle' : 'login.subtitle')}
+          </p>
         </div>
 
-        <form className="flex flex-col gap-5" onSubmit={handleSubmit(onSubmit)} noValidate>
+        <form
+          key={isSignUp ? 'sign-up' : 'login'}
+          className="flex flex-col gap-5"
+          autoComplete="on"
+          onSubmit={handleSubmit(onSubmit)}
+          noValidate
+        >
           <FormInput
             control={control}
             name="email"
@@ -64,7 +89,7 @@ export function Login() {
             placeholder={t('login.emailPlaceholder')}
             icon={Mail01}
             isRequired
-            autoComplete="email"
+            autoComplete="username"
           />
 
           <FormInput
@@ -75,7 +100,7 @@ export function Login() {
             placeholder={t('login.passwordPlaceholder')}
             icon={Lock01}
             isRequired
-            autoComplete="current-password"
+            autoComplete={isSignUp ? 'new-password' : 'current-password'}
           />
 
           <FormCheckbox
@@ -92,14 +117,18 @@ export function Login() {
           )}
 
           <Button type="submit" size="lg" className="w-full" isLoading={isSubmitting}>
-            {t('login.signIn')}
+            {t(isSignUp ? 'login.createAccount' : 'login.signIn')}
           </Button>
         </form>
 
         <p className="mt-6 text-center text-sm text-tertiary">
-          {t('login.noAccount')}{' '}
-          <Button href="/sign-up" color="link-color" size="sm">
-            {t('login.signUp')}
+          {t(isSignUp ? 'login.hasAccount' : 'login.noAccount')}{' '}
+          <Button
+            color="link-color"
+            size="sm"
+            onPress={() => openAuthPage(isSignUp ? '/login' : '/sign-up')}
+          >
+            {t(isSignUp ? 'login.signIn' : 'login.signUp')}
           </Button>
         </p>
       </div>
