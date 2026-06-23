@@ -1,8 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import {Injectable, NotFoundException} from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import {UsersEntity} from "./users.entity";
 import {InjectRepository} from "@nestjs/typeorm";
 import {Repository} from "typeorm";
+import {CreateUserDto} from "./dto/create-user.dto";
 
 @Injectable()
 export class UsersService {
@@ -11,13 +12,32 @@ export class UsersService {
     private userRepository: Repository<UsersEntity>,
   ) {}
 
+  async getAllUsers() {
+    return this.userRepository.find();
+  }
+
   async findByEmail(email: string) {
     return this.userRepository.findOne({ where: { email }});
   }
 
-  async create(email: string, password: string) {
-    const hash = await bcrypt.hash(password, 10);
-    return this.userRepository.insert({email, password: hash});
+  async findById(id: string) {
+    const user = await this.userRepository.findOne({ where: { id } });
+    // return this.userRepository.findOne({where: { id }});
+    if (!user) {
+      throw new NotFoundException("User does not exist");
+    }
+    return user;
+  }
+
+  async createUser(userDto: CreateUserDto) {
+    return this.userRepository.save(userDto);
+    // const newUser = this.userRepository.create(userDto);
+    // await this.userRepository.save({
+    //   email: userDto.email,
+    //   password: newUser.password,
+    //   roles: newUser.roles,
+    // });
+    // return newUser;
   }
 
   async validateCredentials(email: string, password: string) {

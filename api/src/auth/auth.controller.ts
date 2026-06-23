@@ -1,17 +1,19 @@
-import {Controller, Post, UseGuards, Request} from '@nestjs/common';
+import {Controller, Post, Body} from '@nestjs/common';
 import {AuthService} from "./auth.service";
-import {AuthGuard} from "@nestjs/passport";
-import {RequestWithUser} from "../users/interfaces/request-with-user";
-import {ApiBearerAuth} from "@nestjs/swagger";
+import {LoginDto} from "./dto/login.dto";
+import {RegisterDto} from "./dto/register.dto";
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @ApiBearerAuth('JWT-auth')
-  @UseGuards(AuthGuard("local"))
   @Post("login")
-  async login(@Request() req: RequestWithUser) {
-    return this.authService.login(req.user);
+  private login(@Body() data: LoginDto): Promise<string | never> {
+    return this.authService.login(data);
+  }
+
+  @Post("register")
+  private register(@Body() data: RegisterDto) {
+    return this.authService.register(data);
   }
 }

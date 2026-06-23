@@ -1,5 +1,5 @@
-import { ValidationPipe } from '@nestjs/common';
-import { NestFactory } from '@nestjs/core';
+import {ClassSerializerInterceptor, ValidationPipe} from '@nestjs/common';
+import { NestFactory, Reflector } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 
@@ -13,6 +13,10 @@ async function bootstrap() {
       forbidNonWhitelisted: true,
     }),
   );
+
+  app.useGlobalInterceptors(
+    new ClassSerializerInterceptor(app.get(Reflector))
+  )
 
   app.enableCors({
     origin: process.env.CORS_ORIGIN ?? 'http://localhost:5173',
@@ -30,7 +34,6 @@ async function bootstrap() {
         bearerFormat: 'JWT',
         in: 'header',
       },
-      'JWT-auth',
     )
     .build();
   const document = SwaggerModule.createDocument(app, swaggerConfig);

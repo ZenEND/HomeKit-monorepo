@@ -1,15 +1,34 @@
-import {Controller, Get, UseGuards, Request} from "@nestjs/common";
-import {AuthGuard} from "@nestjs/passport";
-import {RequestWithUser} from "./interfaces/request-with-user";
-import {ApiBearerAuth} from "@nestjs/swagger";
+import {Body, Controller, Get, Inject, Param, Post, UseInterceptors} from "@nestjs/common";
+import {ApiBearerAuth, ApiTags} from "@nestjs/swagger";
+import {CreateUserDto} from "./dto/create-user.dto";
+import {UsersService} from "./users.service";
+import {RolesEnum} from "./interfaces/roles.enum";
+import {UsersEntity} from "./users.entity";
+import {CurrentUser} from "./utils/current-user";
+import {Roles} from "../auth/roles.decorator";
+import { CurrentUsersInterceptor } from './users.interseptor';
 
-
+@ApiTags("users")
 @Controller('users')
+@ApiBearerAuth()
 export class UsersController {
-  @ApiBearerAuth('JWT-auth')
-  @UseGuards(AuthGuard("jwt"))
-  @Get("me")
-  getProfile(@Request() req: RequestWithUser){
-    return req.user;
+  @Inject(UsersService) usersService: UsersService;
+
+  @Get('me')
+  @UseInterceptors(CurrentUsersInterceptor)
+  @Roles(RolesEnum.Any)
+  getProfile(@CurrentUser() user: UsersEntity) {
+    return this.usersService.findById(user.id);
+  }
+
+  @Get(':id')
+  @Roles(RolesEnum.Any)
+  findById(@Param('id') id: string) {
+    return this.usersService.findById(id);
+  }
+
+  @Post()
+  createUser(@Body() userDto: CreateUserDto) {
+    return this.usersService.createUser(userDto);
   }
 }
