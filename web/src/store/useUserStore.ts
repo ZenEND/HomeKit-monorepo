@@ -98,3 +98,8 @@ export const useUserStore = create<UserState>((set, get) => ({
     setUser: (user) => set({ user }),
 }));
 
+export function useIsAdmin() {
+  const user = useUserStore((state) => state.user);
+  return user?.roles.includes(RolesEnum.Admin) ?? false;
+}
+

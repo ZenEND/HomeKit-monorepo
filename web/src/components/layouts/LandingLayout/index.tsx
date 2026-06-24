@@ -15,7 +15,7 @@ export function LandingLayout({ children }: PropsWithChildren) {
           <FeaturedIcon icon={Home02} color="brand" theme="gradient" size="sm" />
           <div className="leading-tight">
             <p className="text-sm font-semibold text-primary">{t('app.title')}</p>
-            <p className="hidden text-xs text-tertiary sm:block">{t('app.tagline')}</p>
+            <p className="hidden text-xs text-tertiary sm:block wrap-text">{t('app.tagline')}</p>
           </div>
         </NavLink>
         <LanguageSwitcher />

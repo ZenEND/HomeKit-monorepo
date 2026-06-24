@@ -4,6 +4,7 @@ import {UsersEntity} from "./users.entity";
 import {InjectRepository} from "@nestjs/typeorm";
 import {Repository} from "typeorm";
 import {CreateUserDto} from "./dto/create-user.dto";
+import {UpdateUserDto} from "./dto/update-user.dto";
 
 @Injectable()
 export class UsersService {
@@ -38,6 +39,21 @@ export class UsersService {
     //   roles: newUser.roles,
     // });
     // return newUser;
+  }
+
+  async updateUser(id: string, dto: UpdateUserDto) {
+    const user = await this.findById(id);
+
+    if (dto.email !== undefined) {
+      user.email = dto.email;
+    }
+
+    if (dto.password !== undefined) {
+      const salt = bcrypt.genSaltSync(10);
+      user.password = bcrypt.hashSync(dto.password, salt);
+    }
+
+    return this.userRepository.save(user);
   }
 
   async validateCredentials(email: string, password: string) {

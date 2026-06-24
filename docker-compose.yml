@@ -28,6 +28,10 @@ services:
         condition: service_healthy
     environment:
       PORT: ${PORT:-3000}
+      JWT_KEY: ${JWT_KEY:-change-me-in-production}
+      JWT_EXPIRES: ${JWT_EXPIRES:-1d}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@homekit.local}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin123456}
       DB_HOST: postgres
       DB_PORT: 5432
       DB_USER: ${DB_USER:-homekit}

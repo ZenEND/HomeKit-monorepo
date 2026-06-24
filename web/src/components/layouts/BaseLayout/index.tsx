@@ -1,64 +1,32 @@
-import { cx } from "@/utils/cx";
-import { PropsWithChildren } from "react";
-import { NavLink } from "react-router-dom";
-import { Home02 } from '@untitledui/icons';
-import { FeaturedIcon } from '@/components/foundations/featured-icon/featured-icon';
-import { useTranslation } from "@/lib/i18n/use-translation";
-import { ProfileDropdown } from "@/components/shared/profile-dropdown";
-
-const navItems: Array<{ to: string; key: string; end?: boolean }> = [
-    { to: '/storage', key: 'nav.storage' },
-    { to: '/games', key: 'nav.games' },
-    { to: '/f1', key: 'nav.f1' },
-    { to: '/development', key: 'nav.development' },
-    { to: '/parties', key: 'nav.parties' },
-    { to: '/plans', key: 'nav.plans' },
-    { to: '/food', key: 'nav.food' },
-    { to: '/invite', key: 'nav.invite' },
-];
+import { PropsWithChildren } from 'react';
+import { AmbientBackground } from '@/components/webgl/AmbientBackground';
+import { BottomNav } from '@/components/layouts/BottomNav';
+import { SideNav } from '@/components/layouts/SideNav';
+import { ProfileDropdown } from '@/components/shared/profile-dropdown';
+import { RolesEnum, useUserStore } from '@/store/useUserStore';
 
 export function BaseLayout({ children }: PropsWithChildren) {
-    const { t } = useTranslation();
+  const user = useUserStore((state) => state.user);
+  const isAdmin = user?.roles.includes(RolesEnum.Admin) ?? false;
 
-    return (
-        <div className="min-h-screen bg-secondary">
-            <header className="sticky top-0 z-20 border-b border-secondary bg-primary/90 backdrop-blur-sm">
-                <div className="mx-auto flex w-full max-w-6xl flex-col gap-3 px-4 py-3">
-                    <div className="flex items-center justify-between gap-3 py-2">
-                        <NavLink to="/" className="flex items-center gap-2.5">
-                            <FeaturedIcon icon={Home02} color="brand" theme="gradient" size="sm" />
-                            <div className="leading-tight">
-                                <p className="text-sm font-semibold text-primary">{t('app.title')}</p>
-                                <p className="hidden text-xs text-tertiary sm:block">{t('app.tagline')}</p>
-                            </div>
-                        </NavLink>
-                        <div className="flex items-center gap-3">
-                            <ProfileDropdown />
-                        </div>
-                    </div>
+  return (
+    <div className="relative min-h-screen">
+      <AmbientBackground />
+      <SideNav />
 
-                    <nav className="-mx-1 flex items-center gap-1 overflow-x-auto pb-1">
-                        {navItems.map((item) => (
-                            <NavLink
-                                key={item.to}
-                                to={item.to}
-                                end={item.end}
-                                className={({ isActive }) =>
-                                    cx(
-                                        'shrink-0 rounded-md px-3 py-1.5 text-sm font-medium transition duration-100 ease-linear',
-                                        isActive
-                                            ? 'bg-active text-brand-secondary'
-                                            : 'text-tertiary hover:bg-primary_hover hover:text-secondary_hover',
-                                    )
-                                }
-                            >
-                                {t(item.key)}
-                            </NavLink>
-                        ))}
-                    </nav>
-                </div>
-            </header>
-            {children}
-        </div>
-    );
+      <div className="flex min-h-screen flex-col md:pl-[4.5rem] xl:pl-60">
+        {/* Mobile top bar */}
+        <header className="sticky top-0 z-20 flex items-center justify-between border-b border-secondary/60 bg-primary/80 px-4 py-3 backdrop-blur-xl md:hidden">
+          <div className="min-w-0">
+            <p className="text-sm font-semibold text-primary">HomeKit</p>
+          </div>
+          <ProfileDropdown showAdminBadge={isAdmin} />
+        </header>
+
+        <div className="flex-1 pb-20 md:pb-6 2xl:text-lg">{children}</div>
+      </div>
+
+      <BottomNav />
+    </div>
+  );
 }

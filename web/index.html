@@ -6,6 +6,18 @@
     <title>HomeKit</title>
   </head>
   <body>
+    <script>
+      (function(){
+        try {
+          var raw = localStorage.getItem('homekit-theme');
+          var theme = raw ? JSON.parse(raw).state?.theme : 'system';
+          var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          if (theme === 'dark' || (theme === 'system' && prefersDark)) {
+            document.documentElement.classList.add('dark-mode');
+          }
+        } catch(e){}
+      })();
+    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

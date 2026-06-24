@@ -15,6 +15,7 @@
     "@react-types/shared": "^3.36.0",
     "@tailwindcss/typography": "^0.5.20",
     "@tailwindcss/vite": "^4.3.1",
+    "@tanstack/react-virtual": "^3.14.3",
     "@untitledui/file-icons": "^0.0.9",
     "@untitledui/icons": "^0.0.22",
     "axios": "^1.18.1",

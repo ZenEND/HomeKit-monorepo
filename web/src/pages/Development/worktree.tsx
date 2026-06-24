@@ -5,7 +5,6 @@ import { Card, CardContent } from '@/components/base/card/card';
 import { FeaturedIcon } from '@/components/foundations/featured-icon/featured-icon';
 import { useTranslation } from '@/lib/i18n/use-translation';
 import {
-  badgeForEffort,
   badgeForImpact,
   localizeWorktreeBranch,
   worktreeBranches,
@@ -32,9 +31,6 @@ function VariantCard({ variant }: { variant: WorktreeVariant }) {
         <div className="flex flex-wrap gap-1.5">
           <Badge color={badgeForImpact(variant.impact)} size="sm">
             {t(`common.${variant.impact}`)} {t('common.impact')}
-          </Badge>
-          <Badge color={badgeForEffort(variant.effort)} size="sm">
-            {t(`common.${variant.effort}`)} {t('common.effort')}
           </Badge>
         </div>
         <p className="text-xs text-quaternary">

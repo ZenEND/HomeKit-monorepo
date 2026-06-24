@@ -1,7 +1,8 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import {UsersEntity} from "../users/users.entity";
+import { UsersEntity } from '../users/users.entity';
+import { DatabaseSeedService } from './database.seed.service';
 
 @Module({
   imports: [
@@ -19,6 +20,8 @@ import {UsersEntity} from "../users/users.entity";
         synchronize: true,
       }),
     }),
+    TypeOrmModule.forFeature([UsersEntity]),
   ],
+  providers: [DatabaseSeedService],
 })
 export class DatabaseModule {}

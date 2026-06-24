@@ -4,7 +4,6 @@ export interface PartyIdea {
   emoji: string;
   vibe: string;
   groupSize: string;
-  effort: 'low' | 'medium' | 'high';
   summary: string;
   howItWorks: string[];
   homekitTieIn: string;
@@ -17,7 +16,6 @@ export const partyIdeas: PartyIdea[] = [
     emoji: '🏎️',
     vibe: 'Adrenaline + snacks',
     groupSize: '3–10',
-    effort: 'low',
     summary:
       'Gather for a Grand Prix with a live standings screen, a prediction pool, and themed snacks per team.',
     howItWorks: [
@@ -34,7 +32,6 @@ export const partyIdeas: PartyIdea[] = [
     emoji: '🎮',
     vibe: 'Laughs + friendly chaos',
     groupSize: '4–12',
-    effort: 'low',
     summary:
       'Phones as controllers, the HomeKit screen as host. Rotate through Crocodile, Alias, and Mafia.',
     howItWorks: [
@@ -51,7 +48,6 @@ export const partyIdeas: PartyIdea[] = [
     emoji: '🍝',
     vibe: 'Cozy + tasty',
     groupSize: '2–8',
-    effort: 'medium',
     summary:
       'Pick a cuisine, everyone orders or cooks a dish, and the shared menu tracks who brings what.',
     howItWorks: [
@@ -68,7 +64,6 @@ export const partyIdeas: PartyIdea[] = [
     emoji: '🍿',
     vibe: 'Chill + nostalgic',
     groupSize: '2–8',
-    effort: 'low',
     summary:
       'A themed binge night — trilogy, director, or genre — with a shared snack run and voting on what is next.',
     howItWorks: [
@@ -85,7 +80,6 @@ export const partyIdeas: PartyIdea[] = [
     emoji: '🧠',
     vibe: 'Competitive + clever',
     groupSize: '4–16',
-    effort: 'medium',
     summary:
       'Teams battle across custom rounds — inside jokes, movies, memes — with an LLM generating fresh questions.',
     howItWorks: [
@@ -102,7 +96,6 @@ export const partyIdeas: PartyIdea[] = [
     emoji: '🧺',
     vibe: 'Fresh air + relaxed',
     groupSize: '4–20',
-    effort: 'medium',
     summary:
       'A park meetup with a pinned location, a shared packing list, and lawn-friendly games.',
     howItWorks: [
@@ -119,7 +112,6 @@ export const partyIdeas: PartyIdea[] = [
     emoji: '🎂',
     vibe: 'Sentimental + festive',
     groupSize: '5–25',
-    effort: 'high',
     summary:
       'Coordinate a surprise with private invites, a secret plan timeline, and a shared photo/video wall.',
     howItWorks: [
@@ -136,7 +128,6 @@ export const partyIdeas: PartyIdea[] = [
     emoji: '💞',
     vibe: 'Bonding + funny reveals',
     groupSize: '2–10',
-    effort: 'low',
     summary:
       'A relationship/friendship quiz where everyone guesses answers about each other — great for new and old friends.',
     howItWorks: [
@@ -149,13 +140,6 @@ export const partyIdeas: PartyIdea[] = [
   },
 ];
 
-export function effortLabel(effort: PartyIdea['effort']): string {
-  return effort === 'low' ? 'Low effort' : effort === 'medium' ? 'Medium effort' : 'High effort';
-}
-
-export function effortColor(effort: PartyIdea['effort']): 'success' | 'warning' | 'error' {
-  return effort === 'low' ? 'success' : effort === 'medium' ? 'warning' : 'error';
-}
 
 const partyIdeasUa: Record<
   string,

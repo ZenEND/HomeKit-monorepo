@@ -1,9 +1,11 @@
 import { BadGatewayException, Injectable, Logger } from '@nestjs/common';
+import { GoogleGenAI } from '@google/genai';
 import { getErrorMessage, isRetryableProviderError } from './ai-errors';
 import {
   AI_MODELS,
   AiModelId,
   ModelHealthResult,
+  getModelApiKey,
   resolveAiModelId,
 } from './ai-models.config';
 import { GenerateTextDto, GenerateTextDifficulty } from './dto/generate-text.dto';
@@ -11,6 +13,7 @@ import {
   createAiProviders,
   GeneratedAliasWord,
   getProviderForModel,
+  requestChatCompletion,
 } from './providers/ai-providers';
 
 export interface GenerateTextResponse {
@@ -282,5 +285,133 @@ export class AiService {
 
   private normalizeWord(word: string) {
     return word.trim().toLowerCase();
+  }
+
+  async translateAnimeTitles(
+    items: Array<{ simklId: number; title: string; titleEn?: string | null }>,
+  ): Promise<Array<{ simklId: number; titleUa: string }>> {
+    if (items.length === 0) {
+      return [];
+    }
+
+    const prompt = `Translate anime titles to natural Ukrainian for a watchlist UI.
+
+Rules:
+- Use official Ukrainian localized titles when they are widely known.
+- Keep proper nouns readable in Ukrainian.
+- Return only valid JSON.
+- Translate every item in the input list.
+
+Input:
+${JSON.stringify(
+  items.map((item) => ({
+    simklId: item.simklId,
+    title: item.title,
+    titleEn: item.titleEn ?? null,
+  })),
+)}
+
+Response format:
+{
+  "items": [
+    { "simklId": 123, "titleUa": "Ukrainian title" }
+  ]
+}`;
+
+    const modelsToTry = AI_MODELS.map((model) => model.id);
+    let lastError: unknown;
+
+    for (const modelId of modelsToTry) {
+      try {
+        const content = await this.requestJsonCompletion(modelId, prompt, 2048);
+        const parsed = JSON.parse(content) as {
+          items?: Array<{ simklId?: number; titleUa?: string }>;
+        };
+
+        if (!Array.isArray(parsed.items)) {
+          throw new BadGatewayException('AI translation response was invalid.');
+        }
+
+        return parsed.items
+          .filter((item) => item.simklId && item.titleUa?.trim())
+          .map((item) => ({
+            simklId: Number(item.simklId),
+            titleUa: item.titleUa!.trim(),
+          }));
+      } catch (error) {
+        lastError = error;
+        if (isRetryableProviderError(error)) {
+          this.logger.warn(`Translation model ${modelId} unavailable. Trying next model.`);
+          continue;
+        }
+      }
+    }
+
+    this.logger.warn(
+      `Anime title translation failed: ${getErrorMessage(lastError)}`,
+    );
+    return [];
+  }
+
+  private async requestJsonCompletion(
+    modelId: AiModelId,
+    prompt: string,
+    maxTokens: number,
+  ): Promise<string> {
+    const { model } = getProviderForModel(this.providers, modelId);
+    const apiKey = getModelApiKey(model);
+
+    if (!apiKey) {
+      throw new BadGatewayException(`Set ${model.envKey} in api/.env`);
+    }
+
+    if (model.provider === 'google') {
+      const client = new GoogleGenAI({ apiKey });
+      const response = await client.models.generateContent({
+        model: model.modelName,
+        contents: prompt,
+        config: {
+          temperature: 0.2,
+          maxOutputTokens: maxTokens,
+          responseMimeType: 'application/json',
+        },
+      });
+
+      if (!response.text?.trim()) {
+        throw new BadGatewayException('AI response was empty.');
+      }
+
+      return response.text;
+    }
+
+    const providerConfigs: Record<
+      Exclude<typeof model.provider, 'google'>,
+      { baseUrl: string; referer?: string; appTitle?: string }
+    > = {
+      groq: { baseUrl: 'https://api.groq.com/openai/v1' },
+      openrouter: {
+        baseUrl: 'https://openrouter.ai/api/v1',
+        referer: process.env.APP_URL ?? 'http://localhost:5173',
+        appTitle: 'HomeKit',
+      },
+      huggingface: { baseUrl: 'https://router.huggingface.co/v1' },
+      cerebras: { baseUrl: 'https://api.cerebras.ai/v1' },
+    };
+
+    const config = providerConfigs[model.provider];
+    const content = await requestChatCompletion(
+      config,
+      apiKey,
+      model.modelName,
+      prompt,
+      maxTokens,
+      true,
+    );
+
+    if (!content?.trim()) {
+      throw new BadGatewayException('AI response was empty.');
+    }
+
+    return content;
   }
 }

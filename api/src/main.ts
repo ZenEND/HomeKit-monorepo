@@ -25,7 +25,9 @@ async function bootstrap() {
 
   const swaggerConfig = new DocumentBuilder()
     .setTitle('HomeKit API')
-    .setDescription('HomeKit monorepo API documentation')
+    .setDescription(
+      'HomeKit monorepo API. Includes auth, users, AI, F1, and plans (Simkl anime/TV/movie calendars with watchlists).',
+    )
     .setVersion('1.0')
     .addBearerAuth(
       {

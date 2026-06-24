@@ -7,6 +7,7 @@ import {
 import { Avatar } from '@/components/base/avatar/avatar';
 import { Button } from '@/components/base/buttons/button';
 import { LanguageSwitcher } from '@/components/shared/language-switcher';
+import { ThemeSwitcher } from '@/components/shared/theme-switcher';
 import { useTranslation } from '@/lib/i18n/use-translation';
 import { useUserStore } from '@/store/useUserStore';
 import { cx } from '@/utils/cx';
@@ -19,7 +20,11 @@ const getInitials = (email?: string) => {
   return email.slice(0, 1).toUpperCase();
 };
 
-export function ProfileDropdown() {
+interface ProfileDropdownProps {
+  showAdminBadge?: boolean;
+}
+
+export function ProfileDropdown({ showAdminBadge = false }: ProfileDropdownProps) {
   const { t } = useTranslation();
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const uploadInputRef = useRef<HTMLInputElement>(null);
@@ -46,9 +51,12 @@ export function ProfileDropdown() {
     <AriaDialogTrigger>
       <Button
         color="tertiary"
-        className="rounded-full p-1!"
+        className="relative rounded-full p-1!"
         aria-label={t('profile.menu')}
       >
+        {showAdminBadge && (
+          <span className="absolute -right-0.5 -top-0.5 z-10 size-2.5 rounded-full bg-brand-solid ring-2 ring-primary" />
+        )}
         <Avatar
           size="sm"
           src={avatarSrc}
@@ -138,6 +146,13 @@ export function ProfileDropdown() {
                   </Button>
                 ))}
               </div>
+            </section>
+
+            <section>
+              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-quaternary">
+                {t('theme.label')}
+              </p>
+              <ThemeSwitcher />
             </section>
 
             <section>

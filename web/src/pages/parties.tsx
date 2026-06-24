@@ -1,8 +1,6 @@
-import { useMemo, useState } from 'react';
 import { Stars01 } from '@untitledui/icons';
 import { motion } from 'motion/react';
 import { Badge } from '@/components/base/badges/badges';
-import { ButtonGroup, ButtonGroupItem } from '@/components/base/button-group/button-group';
 import {
   Card,
   CardContent,
@@ -12,9 +10,7 @@ import {
 } from '@/components/base/card/card';
 import { FeaturedIcon } from '@/components/foundations/featured-icon/featured-icon';
 import { useTranslation } from '@/lib/i18n/use-translation';
-import { effortColor, localizePartyIdea, partyIdeas, type PartyIdea } from '@/lib/parties/party-ideas';
-
-type EffortFilter = 'all' | PartyIdea['effort'];
+import { localizePartyIdea, partyIdeas, type PartyIdea } from '@/lib/parties/party-ideas';
 
 function PartyCard({ idea, index }: { idea: PartyIdea; index: number }) {
   const { t, language } = useTranslation();
@@ -41,9 +37,6 @@ function PartyCard({ idea, index }: { idea: PartyIdea; index: number }) {
             <div className="flex flex-wrap items-center gap-2">
               <Badge color="gray" size="sm">
                 {localized.groupSize} {t('common.people')}
-              </Badge>
-              <Badge color={effortColor(idea.effort)} size="sm">
-                {t(`parties.${idea.effort}Effort`)}
               </Badge>
             </div>
           </div>
@@ -75,12 +68,6 @@ function PartyCard({ idea, index }: { idea: PartyIdea; index: number }) {
 
 export function Parties() {
   const { t } = useTranslation();
-  const [filter, setFilter] = useState<EffortFilter>('all');
-
-  const filtered = useMemo(() => {
-    if (filter === 'all') return partyIdeas;
-    return partyIdeas.filter((idea) => idea.effort === filter);
-  }, [filter]);
 
   return (
     <div className="mx-auto flex w-full max-w-4xl flex-col gap-8 px-4 py-10">
@@ -92,26 +79,8 @@ export function Parties() {
         </div>
       </header>
 
-      <div className="flex flex-col gap-3">
-        <p className="text-sm font-medium text-secondary">{t('parties.filter')}</p>
-        <ButtonGroup
-          selectedKeys={[filter]}
-          onSelectionChange={(keys) => {
-            const selected = Array.from(keys)[0];
-            if (selected === 'all' || selected === 'low' || selected === 'medium' || selected === 'high') {
-              setFilter(selected);
-            }
-          }}
-        >
-          <ButtonGroupItem id="all">{t('common.all')}</ButtonGroupItem>
-          <ButtonGroupItem id="low">{t('common.low')}</ButtonGroupItem>
-          <ButtonGroupItem id="medium">{t('common.medium')}</ButtonGroupItem>
-          <ButtonGroupItem id="high">{t('common.high')}</ButtonGroupItem>
-        </ButtonGroup>
-      </div>
-
       <div className="grid gap-4 sm:grid-cols-2">
-        {filtered.map((idea, index) => (
+        {partyIdeas.map((idea, index) => (
           <PartyCard key={idea.id} idea={idea} index={index} />
         ))}
       </div>

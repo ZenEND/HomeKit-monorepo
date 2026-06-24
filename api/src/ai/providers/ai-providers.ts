@@ -244,7 +244,7 @@ interface OpenAiCompatibleConfig {
   appTitle?: string;
 }
 
-async function requestChatCompletion(
+export async function requestChatCompletion(
   config: OpenAiCompatibleConfig,
   apiKey: string,
   modelName: string,

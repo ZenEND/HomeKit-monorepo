@@ -1,15 +1,13 @@
 // A "work tree" of improvement variants — branches of how the project could grow.
-// Each branch has variants you can pick from, with effort, impact, and what you'd learn.
+// Each branch has variants you can pick from, with impact, and what you'd learn.
 
 export type Impact = 'low' | 'medium' | 'high';
-export type Effort = 'low' | 'medium' | 'high';
 
 export interface WorktreeVariant {
   id: string;
   title: string;
   description: string;
   impact: Impact;
-  effort: Effort;
   learn: string;
   recommended?: boolean;
 }
@@ -34,7 +32,6 @@ export const worktreeBranches: WorktreeBranch[] = [
         title: 'Stay modular monolith',
         description: 'Keep one NestJS app with clean modules (auth, games, files, plans).',
         impact: 'medium',
-        effort: 'low',
         learn: 'NestJS modules, dependency injection, clean boundaries',
         recommended: true,
       },
@@ -43,7 +40,6 @@ export const worktreeBranches: WorktreeBranch[] = [
         title: 'Add WebSocket gateway',
         description: 'Real-time rooms for Mafia, Draw & Guess, and live F1 positions.',
         impact: 'high',
-        effort: 'medium',
         learn: 'Socket.io gateways, rooms, presence, reconnect handling',
       },
       {
@@ -51,7 +47,6 @@ export const worktreeBranches: WorktreeBranch[] = [
         title: 'Add a job queue (BullMQ)',
         description: 'Background jobs for thumbnails, LLM calls, and scrapers.',
         impact: 'medium',
-        effort: 'medium',
         learn: 'Redis-backed queues, workers, retries, scheduling',
       },
       {
@@ -59,7 +54,6 @@ export const worktreeBranches: WorktreeBranch[] = [
         title: 'Split into microservices',
         description: 'Separate game, media, and auth services. Overkill for now.',
         impact: 'low',
-        effort: 'high',
         learn: 'Message brokers, service discovery, distributed tracing',
       },
     ],
@@ -75,7 +69,6 @@ export const worktreeBranches: WorktreeBranch[] = [
         title: 'TypeORM + Postgres relations',
         description: 'Model users, invites, events, scores, file metadata properly.',
         impact: 'high',
-        effort: 'medium',
         learn: 'Entity relations, migrations, query builder',
         recommended: true,
       },
@@ -84,7 +77,6 @@ export const worktreeBranches: WorktreeBranch[] = [
         title: 'Redis for hot state & cache',
         description: 'Game room state, LLM/F1 response cache, rate limits.',
         impact: 'high',
-        effort: 'low',
         learn: 'Caching strategies, TTLs, pub/sub',
       },
       {
@@ -92,7 +84,6 @@ export const worktreeBranches: WorktreeBranch[] = [
         title: 'Disk volumes + thumbnails',
         description: 'Real photo/video storage with generated previews.',
         impact: 'medium',
-        effort: 'medium',
         learn: 'Streaming uploads, sharp, volume mounts',
       },
     ],
@@ -108,7 +99,6 @@ export const worktreeBranches: WorktreeBranch[] = [
         title: 'Local Ollama provider',
         description: 'Run Llama/Mistral locally — zero API cost, full privacy.',
         impact: 'high',
-        effort: 'medium',
         learn: 'Local LLM serving, prompt templates, streaming',
         recommended: true,
       },
@@ -117,7 +107,6 @@ export const worktreeBranches: WorktreeBranch[] = [
         title: 'Curated JSON banks',
         description: 'Ship static word/quiz packs as a reliable offline baseline.',
         impact: 'medium',
-        effort: 'low',
         learn: 'Content modeling, seeding, versioned data',
       },
       {
@@ -125,7 +114,6 @@ export const worktreeBranches: WorktreeBranch[] = [
         title: 'Free cloud tiers as boost',
         description: 'Groq / Gemini free tiers behind a provider interface.',
         impact: 'medium',
-        effort: 'low',
         learn: 'Provider abstraction, fallbacks, rate-limit handling',
       },
     ],
@@ -141,7 +129,6 @@ export const worktreeBranches: WorktreeBranch[] = [
         title: 'Offline-first PWA',
         description: 'Service worker, install prompt, cached games and menus.',
         impact: 'high',
-        effort: 'medium',
         learn: 'Service workers, background sync, manifests',
         recommended: true,
       },
@@ -150,7 +137,6 @@ export const worktreeBranches: WorktreeBranch[] = [
         title: 'Route-based code splitting',
         description: 'Lazy-load pages to shrink the 1.1MB bundle warning.',
         impact: 'medium',
-        effort: 'low',
         learn: 'React.lazy, Suspense, Vite manualChunks',
       },
       {
@@ -158,7 +144,6 @@ export const worktreeBranches: WorktreeBranch[] = [
         title: 'Real-time UI hooks',
         description: 'Live scoreboards and positions via WebSocket subscriptions.',
         impact: 'medium',
-        effort: 'medium',
         learn: 'WS client state, optimistic updates, Zustand sync',
       },
     ],
@@ -174,7 +159,6 @@ export const worktreeBranches: WorktreeBranch[] = [
         title: 'CI pipeline (lint, test, build)',
         description: 'GitHub Actions on every push and PR.',
         impact: 'high',
-        effort: 'low',
         learn: 'CI workflows, caching, matrix builds',
         recommended: true,
       },
@@ -183,7 +167,6 @@ export const worktreeBranches: WorktreeBranch[] = [
         title: 'Test coverage',
         description: 'Vitest for web, Jest + e2e for the NestJS API.',
         impact: 'medium',
-        effort: 'medium',
         learn: 'Unit/integration tests, mocking, e2e',
       },
       {
@@ -191,7 +174,6 @@ export const worktreeBranches: WorktreeBranch[] = [
         title: 'Logging & metrics',
         description: 'Structured logs, health checks, simple dashboards.',
         impact: 'medium',
-        effort: 'medium',
         learn: 'Pino, Prometheus, Grafana basics',
       },
       {
@@ -199,7 +181,6 @@ export const worktreeBranches: WorktreeBranch[] = [
         title: 'One-command home deploy',
         description: 'Reproducible Docker deploy with exposed-port hardening.',
         impact: 'high',
-        effort: 'medium',
         learn: 'Compose profiles, reverse proxy, TLS, secrets',
       },
     ],
@@ -210,9 +191,6 @@ export function badgeForImpact(impact: Impact): 'success' | 'warning' | 'gray' {
   return impact === 'high' ? 'success' : impact === 'medium' ? 'warning' : 'gray';
 }
 
-export function badgeForEffort(effort: Effort): 'success' | 'warning' | 'error' {
-  return effort === 'low' ? 'success' : effort === 'medium' ? 'warning' : 'error';
-}
 
 const branchesUa: Record<string, Pick<WorktreeBranch, 'area' | 'goal'>> = {
   backend: {
