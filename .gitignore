@@ -9,3 +9,5 @@ coverage
 .turbo
 *.tsbuildinfo
 web/INSTRUCTIONS.md
+uploads/*
+!uploads/.gitkeep

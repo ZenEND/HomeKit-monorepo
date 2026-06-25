@@ -8,6 +8,9 @@ import { AiModule } from './ai/ai.module';
 import {APP_GUARD} from "@nestjs/core";
 import {RolesGuard} from "./auth/roles.guard";
 import { F1Module } from './f1/f1.module';
+import {FilesModule} from "./files/files.module";
+import { ServeStaticModule } from '@nestjs/serve-static';
+import {join} from "path";
 import { ScheduleModule } from '@nestjs/schedule';
 import { PlansModule } from './plans/plans.module';
 
@@ -20,10 +23,21 @@ import { PlansModule } from './plans/plans.module';
     DatabaseModule,
     UsersModule,
     AuthModule,
+    FilesModule,
     AiModule,
     F1Module,
     PlansModule,
+    F1Module,
+
+    ServeStaticModule.forRoot({
+      rootPath: join(process.cwd(), 'uploads'),
+      serveRoot: '/uploads',
+      serveStaticOptions: {
+        index: false,
+      }
+    })
   ],
+
   controllers: [AppController],
   providers: [
     {

@@ -16,6 +16,7 @@ import { DatabaseSeedService } from './database.seed.service';
         username: config.get<string>('DB_USER', 'homekit'),
         password: config.get<string>('DB_PASSWORD', 'homekit'),
         database: config.get<string>('DB_NAME', 'homekit'),
+        debug: true,
         autoLoadEntities: true,
         synchronize: true,
       }),
