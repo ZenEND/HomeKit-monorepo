@@ -7,7 +7,10 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { GenerateTextDto } from './dto/generate-text.dto';
+import { GenerateCardFieldsDto } from './dto/generate-card-fields.dto';
 import { AiService } from './ai.service';
+import { Roles } from '../auth/roles.decorator';
+import { RolesEnum } from '../users/interfaces/roles.enum';
 
 @ApiTags('ai')
 @Controller('ai')
@@ -53,5 +56,17 @@ export class AiController {
   })
   async generateText(@Body() generateTextDto: GenerateTextDto) {
     return this.aiService.generateText(generateTextDto);
+  }
+
+  @Post('generate-card-fields')
+  @ApiBearerAuth()
+  @Roles(RolesEnum.Admin)
+  @ApiOperation({
+    summary: 'Generate card form fields from a description (admin only)',
+    description: 'GPT call that pre-fills card name, description, flavorText, and stat hints. Never called during an active game.',
+  })
+  @ApiOkResponse({ description: 'CardFormData JSON object' })
+  async generateCardFields(@Body() dto: GenerateCardFieldsDto) {
+    return this.aiService.generateCardFields(dto.systemPrompt, dto.userPrompt);
   }
 }

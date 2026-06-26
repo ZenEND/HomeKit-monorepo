@@ -287,6 +287,32 @@ export class AiService {
     return word.trim().toLowerCase();
   }
 
+  async generateCardFields(
+    systemPrompt: string,
+    userPrompt: string,
+  ): Promise<Record<string, unknown>> {
+    const fullPrompt = `System: ${systemPrompt}\n\nUser: ${userPrompt}`;
+    const modelsToTry = AI_MODELS.map((model) => model.id);
+    let lastError: unknown;
+
+    for (const modelId of modelsToTry) {
+      try {
+        const content = await this.requestJsonCompletion(modelId, fullPrompt, 512);
+        const raw = content.replace(/```json\n?/g, '').replace(/```/g, '').trim();
+        return JSON.parse(raw) as Record<string, unknown>;
+      } catch (error) {
+        lastError = error;
+        if (isRetryableProviderError(error)) {
+          continue;
+        }
+      }
+    }
+
+    throw lastError instanceof BadGatewayException
+      ? lastError
+      : new BadGatewayException('AI failed to generate card fields.');
+  }
+
   async translateAnimeTitles(
     items: Array<{ simklId: number; title: string; titleEn?: string | null }>,
   ): Promise<Array<{ simklId: number; titleUa: string }>> {

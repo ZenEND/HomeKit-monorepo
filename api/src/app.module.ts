@@ -13,6 +13,9 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import {join} from "path";
 import { ScheduleModule } from '@nestjs/schedule';
 import { PlansModule } from './plans/plans.module';
+import { CardsModule } from './cards/cards.module';
+import { EffectsModule } from './effects/effects.module';
+import { CarryEffectsModule } from './carry-effects/carry-effects.module';
 
 @Module({
   imports: [
@@ -28,14 +31,16 @@ import { PlansModule } from './plans/plans.module';
     F1Module,
     PlansModule,
     F1Module,
-
     ServeStaticModule.forRoot({
       rootPath: join(process.cwd(), 'uploads'),
       serveRoot: '/uploads',
       serveStaticOptions: {
         index: false,
       }
-    })
+    }),
+    CardsModule,
+    EffectsModule,
+    CarryEffectsModule,
   ],
 
   controllers: [AppController],

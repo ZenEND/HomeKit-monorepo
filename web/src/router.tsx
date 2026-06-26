@@ -29,6 +29,18 @@ const AliasGame = lazy(() =>
   import('./pages/AliasGame').then((m) => ({ default: m.AliasGame })),
 );
 const AdminPage = lazy(() => import('./pages/admin').then((m) => ({ default: m.AdminPage })));
+const CardLibraryPage = lazy(() =>
+  import('./pages/admin/cards').then((m) => ({ default: m.CardLibraryPage })),
+);
+const CardNewPage = lazy(() =>
+  import('./pages/admin/cards/new').then((m) => ({ default: m.CardNewPage })),
+);
+const CarryEffectsPage = lazy(() =>
+  import('./pages/admin/carry-effects').then((m) => ({ default: m.CarryEffectsPage })),
+);
+const AdminGamesPage = lazy(() =>
+  import('./features/admin/games/GMApprovalWidget').then((m) => ({ default: m.AdminGamesPage })),
+);
 
 const PlansShell = lazy(() =>
   import('./pages/plans').then((m) => ({ default: m.PlansShell })),
@@ -228,6 +240,26 @@ export const router = createBrowserRouter([
           {
             path: 'admin',
             element: <AdminPage />,
+          },
+          {
+            path: 'admin/cards',
+            element: <CardLibraryPage />,
+          },
+          {
+            path: 'admin/cards/new',
+            element: <CardNewPage />,
+          },
+          {
+            path: 'admin/cards/:id',
+            element: <CardNewPage />,
+          },
+          {
+            path: 'admin/carry-effects',
+            element: <CarryEffectsPage />,
+          },
+          {
+            path: 'admin/games',
+            element: <AdminGamesPage />,
           },
         ],
       },

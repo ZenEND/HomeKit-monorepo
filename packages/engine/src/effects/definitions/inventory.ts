@@ -1,0 +1,136 @@
+import { EffectDefinition } from '../types';
+
+export const inventoryEffects: EffectDefinition[] = [
+  {
+    id: 'inventory.add_item',
+    label: 'Give Item from Deck',
+    description: 'Draw one or more items from a deck and give them to the target player.',
+    module: 'InventoryModule',
+    category: 'inventory',
+    params: [
+      {
+        key: 'target',
+        label: 'Target',
+        type: 'player_target',
+        options: ['active_player', 'all', 'choose'],
+        defaultValue: 'active_player',
+      },
+      {
+        key: 'deck',
+        label: 'Deck',
+        type: 'select',
+        options: ['treasure', 'door'],
+        defaultValue: 'treasure',
+      },
+      {
+        key: 'count',
+        label: 'Count',
+        type: 'number',
+        defaultValue: 1,
+        min: 1,
+        max: 3,
+      },
+    ],
+  },
+  {
+    id: 'inventory.remove_item',
+    label: 'Discard Equipped Item',
+    description: 'Force a player to discard an equipped item from a specific slot.',
+    module: 'InventoryModule',
+    category: 'inventory',
+    params: [
+      {
+        key: 'target',
+        label: 'Target',
+        type: 'player_target',
+        options: ['active_player', 'all', 'choose'],
+        defaultValue: 'active_player',
+      },
+      {
+        key: 'slot',
+        label: 'Slot',
+        type: 'select',
+        options: ['random', 'choose', 'all'],
+        defaultValue: 'random',
+      },
+      {
+        key: 'to',
+        label: 'Send To',
+        type: 'select',
+        options: ['discard', 'hand'],
+        defaultValue: 'discard',
+      },
+    ],
+  },
+  {
+    id: 'inventory.steal_item',
+    label: 'Steal Item',
+    description: 'Steal an item from another player.',
+    module: 'InventoryModule',
+    category: 'inventory',
+    params: [
+      {
+        key: 'from',
+        label: 'From',
+        type: 'player_target',
+        options: ['choose'],
+        defaultValue: 'choose',
+      },
+      {
+        key: 'slot',
+        label: 'Slot',
+        type: 'select',
+        options: ['random', 'choose'],
+        defaultValue: 'random',
+      },
+    ],
+  },
+  {
+    id: 'inventory.add_currency',
+    label: 'Add Gold',
+    description: 'Give gold to the target player.',
+    module: 'InventoryModule',
+    category: 'inventory',
+    params: [
+      {
+        key: 'target',
+        label: 'Target',
+        type: 'player_target',
+        options: ['active_player', 'all', 'choose'],
+        defaultValue: 'active_player',
+      },
+      {
+        key: 'amount',
+        label: 'Amount',
+        type: 'number',
+        defaultValue: 100,
+        min: 100,
+        max: 2000,
+      },
+    ],
+  },
+  {
+    id: 'inventory.lose_currency',
+    label: 'Lose Gold',
+    description: 'Remove gold from the target player.',
+    module: 'InventoryModule',
+    category: 'inventory',
+    params: [
+      {
+        key: 'target',
+        label: 'Target',
+        type: 'player_target',
+        options: ['active_player', 'all', 'choose'],
+        defaultValue: 'active_player',
+      },
+      {
+        key: 'amount',
+        label: 'Amount',
+        type: 'number',
+        defaultValue: 100,
+        min: 100,
+        max: 2000,
+      },
+    ],
+  },
+];
