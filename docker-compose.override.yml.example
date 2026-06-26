@@ -1,0 +1,17 @@
+# Local overrides — copy this file to docker-compose.override.yml (gitignored)
+# and set HOST to your machine's LAN IP so other devices can reach the services.
+#
+# Find your LAN IP:
+#   macOS:  ipconfig getifaddr en0
+#   Linux:  hostname -I | awk '{print $1}'
+#
+# docker-compose.override.yml is loaded automatically by `docker compose up`.
+
+services:
+  api:
+    environment:
+      HOST: 192.168.1.10   # ← replace with your LAN IP
+
+  web:
+    environment:
+      HOST: 192.168.1.10   # ← replace with your LAN IP (must match api)

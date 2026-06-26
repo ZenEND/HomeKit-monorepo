@@ -1,28 +1,64 @@
 # HomeKit Monorepo
 
-A pnpm workspace monorepo with:
+A pnpm workspace monorepo containing all HomeKit packages under `packages/`.
 
-- **api** — NestJS backend with TypeORM and PostgreSQL
-- **web** — React frontend with Vite, TypeScript, Zustand, React Router, Sass, and PostCSS modules
+## Packages
+
+| Package | Name | Description |
+|---|---|---|
+| `packages/api` | `api` | NestJS backend — TypeORM, PostgreSQL, Swagger |
+| `packages/web` | `web` | React + Vite frontend — Zustand, React Router, Tailwind |
+| `packages/engine` | `@homekit/engine` | Shared game-engine types and effect registry |
+| `packages/types` | `@homekit/types` | Shared domain types used by both `api` and `web` |
 
 ## Prerequisites
 
 - [Node.js 22+](https://nodejs.org/) (see `.nvmrc`)
-- [pnpm](https://pnpm.io/) (via `corepack enable`)
-- [Docker](https://www.docker.com/) and Docker Compose (for containerized development)
+- [pnpm](https://pnpm.io/) — `corepack enable && corepack prepare pnpm --activate`
+- [Docker](https://www.docker.com/) and Docker Compose (for the database and containerised dev)
 
-## Project structure
+## Workspace layout
 
 ```
 HomeKit-monorepo/
-├── api/                 # NestJS backend
-├── web/                 # React + Vite frontend
+├── packages/
+│   ├── api/             # NestJS backend
+│   ├── web/             # React + Vite frontend
+│   ├── engine/          # @homekit/engine — game logic & effect definitions
+│   └── types/           # @homekit/types — shared domain types
 ├── docker-compose.yml   # Local dev stack (postgres + api + web)
-├── pnpm-workspace.yaml
-└── package.json         # Root workspace scripts
+├── pnpm-workspace.yaml  # workspace: packages/*
+└── package.json         # Root scripts
 ```
 
-## Quick start (local)
+### How pnpm workspaces work
+
+`pnpm-workspace.yaml` lists all packages that belong to the workspace:
+
+```yaml
+packages:
+  - 'packages/*'
+```
+
+Every directory directly under `packages/` is treated as a workspace package.
+pnpm creates symlinks in each package's `node_modules` so that internal packages
+like `@homekit/engine` and `@homekit/types` are resolved as if they were published
+to npm, but from the local filesystem. The `workspace:*` version range in
+`package.json` dependencies pins the link to the local version.
+
+Workspace packages are resolved **by TypeScript and Vite to their TypeScript source**
+(no build step required for development):
+
+- `packages/api/tsconfig.json` maps `@homekit/engine` and `@homekit/types` to their
+  `src/index.ts` via `compilerOptions.paths`. NestJS CLI (ts-node) then compiles
+  those files alongside the API source.
+- `packages/web/vite.config.ts` adds `resolve.alias` entries that point Vite
+  directly at the source TypeScript files.
+
+## Quick start — local (no container rebuild)
+
+This is the fastest workflow. Only PostgreSQL and Redis run in Docker; Node.js
+processes run directly on your machine so changes are picked up instantly.
 
 ### 1. Install dependencies
 
@@ -34,106 +70,230 @@ pnpm install
 ### 2. Configure environment
 
 ```bash
-cp .env.example .env
-cp api/.env.example api/.env
+cp packages/api/.env.example packages/api/.env
+# Edit packages/api/.env if you need custom values (defaults work out of the box)
 ```
 
-For local development without Docker, set `DB_HOST=localhost` in `api/.env`.
-
-### 3. Start PostgreSQL
-
-Run only the database container:
+### 3. Start infrastructure (Postgres + Redis only)
 
 ```bash
-docker compose up postgres -d
+docker compose up postgres redis -d
 ```
 
-### 4. Start development servers
+Both containers expose their default ports (`5432`, `6379`) and persist data in
+named Docker volumes (`pgdata`, `redisdata`), so your data survives container
+restarts **and you never need to rebuild them**.
 
-In separate terminals:
+To stop them later:
 
 ```bash
-pnpm dev:api   # http://localhost:3000
-pnpm dev:web   # http://localhost:5173
+docker compose stop postgres redis
+# or remove containers + keep volumes:
+docker compose down          # keeps volumes
+docker compose down -v       # also wipes volumes (fresh DB / cache)
 ```
 
-Or run both in parallel:
+### 4. Start API in dev mode
 
 ```bash
-pnpm dev
+pnpm dev:api     # builds engine/types once, then NestJS watch mode → http://localhost:3000
 ```
 
-### 5. Verify
+> NestJS watch mode (`nest start --watch`) recompiles only the changed file on
+> every save — no manual rebuild, no container restart needed.
 
-- Open [http://localhost:5173](http://localhost:5173) — frontend home page
-- Open [http://localhost:3000](http://localhost:3000) — API health check JSON
-
-The home page fetches the API health endpoint and shows database connection status.
-
-## Quick start (Docker)
-
-Run the full stack with hot reload:
+### 5. Start frontend in dev mode (separate terminal)
 
 ```bash
-cp .env.example .env
+pnpm dev:web     # Vite HMR → http://localhost:5173
+```
+
+### 6. Open the app
+
+| URL | Description |
+|-----|-------------|
+| http://localhost:5173 | React frontend |
+| http://localhost:3000/api | Swagger UI |
+| http://localhost:3000 | API health |
+| localhost:6379 | Redis (use `redis-cli` or any GUI) |
+| localhost:5432 | PostgreSQL |
+
+### Useful one-liners
+
+```bash
+# Inspect Redis keys (game rooms, etc.)
+docker exec -it homekit-redis redis-cli KEYS '*'
+
+# Flush Redis without restarting
+docker exec -it homekit-redis redis-cli FLUSHALL
+
+# Connect to Postgres
+docker exec -it homekit-postgres psql -U homekit -d homekit
+
+# Re-build engine only (when you change packages/engine/src)
+pnpm --filter @homekit/engine build
+```
+
+---
+
+## Quick start — full Docker (all services in containers)
+
+Use this when you want to test the production-like stack or share a demo.
+
+```bash
+cp packages/api/.env.example packages/api/.env
 docker compose up --build
 ```
 
+> You need to rebuild (`--build`) only when `Dockerfile` or `package.json`
+> changes. Normal code edits are picked up via bind-mounts + watch mode.
+
 ### Services
 
-| Service  | URL                        | Description              |
-|----------|----------------------------|--------------------------|
-| web      | http://localhost:5173      | Vite dev server          |
-| api      | http://localhost:3000      | NestJS API               |
-| postgres | localhost:5432             | PostgreSQL database      |
+| Service  | URL                   | Notes |
+|----------|-----------------------|-------|
+| web      | http://localhost:5173 | Vite dev server with HMR |
+| api      | http://localhost:3000 | NestJS watch mode |
+| postgres | localhost:5432        | PostgreSQL 16 |
+| redis    | localhost:6379        | Redis 7 |
 
-### Hot reload
+### Hot reload in containers
 
-- **api**: source files in `api/` are bind-mounted; Nest watch mode restarts on changes
-- **web**: source files in `web/` are bind-mounted; Vite HMR applies changes instantly
-
-### Common Docker commands
+- **api** — `packages/api/` bind-mounted; Nest recompiles on save
+- **web** — `packages/web/` bind-mounted; Vite applies HMR instantly
+- **engine/types** — both bind-mounted in all containers; rebuild with
+  `pnpm --filter @homekit/engine build` on host then restart only the api container:
 
 ```bash
-# Start in background
-docker compose up -d --build
-
-# View logs
-docker compose logs -f
-
-# Stop services
-docker compose down
-
-# Reset database (removes all data)
-docker compose down -v
+pnpm --filter @homekit/engine build
+docker compose restart api
 ```
+
+---
+
+## LAN access — reaching services from other devices
+
+By default all URLs point to `localhost`, which means only the host machine can
+open the app. To expose services to phones, tablets, or other PCs on your
+network, set the `HOST` variable to your machine's LAN IP.
+
+### 1. Find your LAN IP
+
+```bash
+# macOS
+ipconfig getifaddr en0
+
+# Linux
+hostname -I | awk '{print $1}'
+```
+
+### 2. Set HOST in .env
+
+```bash
+# .env (root)
+HOST=192.168.1.10   # ← your actual LAN IP
+```
+
+### 3. Option A — direct ports (simplest)
+
+Each service is accessible on its own port:
+
+```bash
+docker compose up --build
+```
+
+| Service | URL |
+|---------|-----|
+| Web     | http://192.168.1.10:5173 |
+| API     | http://192.168.1.10:3000 |
+| Swagger | http://192.168.1.10:3000/api |
+| Redis   | 192.168.1.10:6379 |
+| Postgres| 192.168.1.10:5432 |
+
+### 3. Option B — web on port 80 via Nginx
+
+Nginx serves the frontend on port 80 so users don't have to type `:5173`.
+The API stays on port 3000 directly — this keeps Socket.IO simple (no path
+rewriting, no namespace issues).
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.nginx.yml up --build
+```
+
+| Service | URL |
+|---------|-----|
+| Web     | http://192.168.1.10 |
+| API     | http://192.168.1.10:3000 |
+| Swagger | http://192.168.1.10:3000/api |
+
+> The Nginx config lives in `nginx/nginx.conf`. It proxies WebSocket upgrades
+> for Vite HMR. Socket.IO connects directly to port 3000, bypassing nginx.
+
+### Optional: per-machine override file
+
+Copy the example override and set your IP there instead of in `.env`:
+
+```bash
+cp docker-compose.override.yml.example docker-compose.override.yml
+# edit docker-compose.override.yml and set HOST=<your IP>
+```
+
+`docker-compose.override.yml` is gitignored and loaded automatically by
+`docker compose up`, so you never accidentally commit a machine-specific IP.
 
 ## Root scripts
 
-| Script       | Description                          |
-|--------------|--------------------------------------|
-| `pnpm dev`   | Run api and web dev servers          |
-| `pnpm dev:api` | Run NestJS in watch mode           |
-| `pnpm dev:web` | Run Vite dev server                |
-| `pnpm build` | Build all packages                   |
-| `pnpm build:api` | Build NestJS app                 |
-| `pnpm build:web` | Build frontend for production    |
+| Script               | Description                                              |
+|----------------------|----------------------------------------------------------|
+| `pnpm build:packages`| Build `@homekit/engine` + `@homekit/types` to `dist/`   |
+| `pnpm dev`           | Build packages then run api + web in parallel            |
+| `pnpm dev:api`       | Build packages then run NestJS in watch mode             |
+| `pnpm dev:web`       | Build packages then run Vite dev server                  |
+| `pnpm build`         | Build everything (packages → api → web)                  |
+| `pnpm build:api`     | Build packages then NestJS app                           |
+| `pnpm build:web`     | Build packages then frontend for production              |
+| `pnpm typecheck`     | Run tsc --noEmit across all packages                     |
+| `pnpm lint`          | Run ESLint across all packages                           |
+
+## Shared packages
+
+### `@homekit/engine`
+
+Game-engine types and the effect registry. Both `api` and `web` depend on this.
+Neither package needs to build it — the API resolves it via tsconfig `paths`,
+and Vite resolves it via `resolve.alias`.
+
+Key exports: `EffectDefinition`, `EffectInstance`, `EffectParam`, `EffectCategory`,
+`EffectRegistry`, `createDefaultRegistry`.
+
+### `@homekit/types`
+
+Domain types shared between the API and the web client.
+
+Key exports: `Card`, `CardType`, `CardStatus`, `CardStats`, `CreateCardPayload`,
+`CardsQuery`, `CarryEffect`, `GmApprovalPayload`, `RolesEnum`.
+
+`api` uses these types in its entities and DTOs.
+`web` uses them in API client functions and components.
 
 ## Environment variables
 
-See [`.env.example`](.env.example) for the full list. Key variables:
+See [`.env.example`](.env.example) for the full list.
 
-| Variable         | Default              | Description                    |
-|------------------|----------------------|--------------------------------|
-| `DB_HOST`        | `postgres` / `localhost` | PostgreSQL host            |
-| `DB_PORT`        | `5432`               | PostgreSQL port                |
-| `DB_USER`        | `homekit`            | Database user                  |
-| `DB_PASSWORD`    | `homekit`            | Database password              |
-| `DB_NAME`        | `homekit`            | Database name                  |
-| `PORT`           | `3000`               | API server port                |
-| `VITE_API_URL`   | `http://localhost:3000` | API URL for frontend       |
+| Variable       | Default                     | Description                                          |
+|----------------|-----------------------------|------------------------------------------------------|
+| `HOST`         | `localhost`                 | Host/IP used to build service URLs for LAN access    |
+| `DB_HOST`      | `postgres` / `localhost`    | PostgreSQL host                                      |
+| `DB_PORT`      | `5432`                      | PostgreSQL port                                      |
+| `DB_USER`      | `homekit`                   | Database user                                        |
+| `DB_PASSWORD`  | `homekit`                   | Database password                                    |
+| `DB_NAME`      | `homekit`                   | Database name                                        |
+| `REDIS_URL`    | `redis://localhost:6379`    | Redis connection URL (game rooms)                    |
+| `PORT`         | `3000`                      | API server port                                      |
+| `VITE_API_URL` | `http://${HOST}:3000`       | API base URL baked into the frontend bundle          |
+| `CORS_ORIGIN`  | `http://${HOST}:5173`       | Origin the API accepts cross-origin requests from    |
 
 ## Notes
 
-- TypeORM `synchronize: true` is enabled for local development only. Do not use in production.
-- Package-specific docs: [api/README.md](api/README.md), [web/README.md](web/README.md).
+- TypeORM `synchronize: true` is enabled for local development only.
+- Package-specific docs: [packages/api/README.md](packages/api/README.md), [packages/web/README.md](packages/web/README.md).

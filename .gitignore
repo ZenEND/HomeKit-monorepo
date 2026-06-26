@@ -3,6 +3,7 @@ node_modules
 dist
 .env
 .env.local
+docker-compose.override.yml
 *.log
 .DS_Store
 coverage
@@ -11,3 +12,4 @@ coverage
 web/INSTRUCTIONS.md
 uploads/*
 !uploads/.gitkeep
+.idea
