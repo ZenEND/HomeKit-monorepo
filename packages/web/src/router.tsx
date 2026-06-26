@@ -41,6 +41,12 @@ const CarryEffectsPage = lazy(() =>
 const AdminApprovalsPage = lazy(() =>
   import('./features/admin/games/GMApprovalWidget').then((m) => ({ default: m.AdminGamesPage })),
 );
+const AdminGamesListPage = lazy(() =>
+  import('./pages/admin/games').then((m) => ({ default: m.AdminGamesListPage })),
+);
+const GameWizardPage = lazy(() =>
+  import('./pages/admin/games/wizard').then((m) => ({ default: m.GameWizardPage })),
+);
 const GameMonitorPage = lazy(() => import('./pages/admin/monitor'));
 const DoorEventCreatorPage = lazy(() => import('./pages/admin/door-events'));
 const MunchkinLobby = lazy(() => import('./pages/munchkin/Lobby'));
@@ -274,6 +280,18 @@ export const router = createBrowserRouter([
           {
             path: 'admin/carry-effects',
             element: <CarryEffectsPage />,
+          },
+          {
+            path: 'admin/games',
+            element: <AdminGamesListPage />,
+          },
+          {
+            path: 'admin/games/new',
+            element: <GameWizardPage />,
+          },
+          {
+            path: 'admin/games/:id',
+            element: <GameWizardPage />,
           },
           {
             path: 'admin/games/approvals',

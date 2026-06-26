@@ -19,6 +19,7 @@ const mainNavItems = [
 
 const adminSubItems = [
   { to: '/admin', label: 'Dashboard', icon: '⚙', end: true },
+  { to: '/admin/games', label: 'Games', icon: '🕹', end: false },
   { to: '/admin/cards', label: 'Cards', icon: '🃏', end: false },
   { to: '/admin/door-events', label: 'Door Events', icon: '🚪', end: true },
   { to: '/admin/carry-effects', label: 'Carry Effects', icon: '✨', end: true },
