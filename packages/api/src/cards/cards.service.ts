@@ -61,6 +61,7 @@ export class CardsService {
     card.description = dto.description ?? '';
     card.flavorText = dto.flavorText ?? '';
     card.imageUrl = dto.imageUrl ?? '';
+    card.imageFileId = dto.imageFileId ?? null;
     card.stats = (dto.stats as CardEntity['stats']) ?? {};
     card.effects = (dto.effects as EffectInstance[]) ?? [];
     card.situationText = dto.situationText ?? '';

@@ -7,6 +7,7 @@ import {
   IsObject,
   IsOptional,
   IsString,
+  IsUUID,
   MaxLength,
   ValidateNested,
 } from 'class-validator';
@@ -93,6 +94,11 @@ export class CreateCardDto {
   @IsOptional()
   @IsString()
   imageUrl?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsUUID()
+  imageFileId?: string;
 
   @ApiPropertyOptional({ type: CardStatsDto })
   @IsOptional()
