@@ -1,6 +1,11 @@
 import { create } from 'zustand';
+import { useShallow } from 'zustand/react/shallow';
 import * as jsonpatch from 'fast-json-patch';
-import type { MunchkinGameState, PlayerState, MunchkinCard, Phase } from '@homekit/engine';
+import type { MunchkinGameState, PlayerState, MunchkinCard, Phase, GameEvent } from '@homekit/engine';
+
+const EMPTY_CARDS: MunchkinCard[] = [];
+const EMPTY_PLAYERS: PlayerState[] = [];
+const EMPTY_EVENTS: GameEvent[] = [];
 
 interface GameStore {
   state: MunchkinGameState | null;
@@ -52,25 +57,27 @@ export function usePlayer(playerId: string): PlayerState | null {
 }
 
 export function useMyHand(myPlayerId: string): MunchkinCard[] {
-  return useGameStore((s) => s.state?.players[myPlayerId]?.hand ?? []);
+  return useGameStore((s) => s.state?.players[myPlayerId]?.hand ?? EMPTY_CARDS);
 }
 
 export function useAllPlayers(): PlayerState[] {
-  return useGameStore((s) => {
-    const state = s.state;
-    if (!state) return [];
-    return state.turnOrder
-      .map((id) => state.players[id])
-      .filter((p): p is PlayerState => Boolean(p));
-  });
+  return useGameStore(
+    useShallow((s) => {
+      const state = s.state;
+      if (!state) return EMPTY_PLAYERS;
+      return state.turnOrder
+        .map((id) => state.players[id])
+        .filter((p): p is PlayerState => Boolean(p));
+    }),
+  );
 }
 
 export function useCombatStack() {
   return useGameStore((s) => s.state?.combatStack ?? null);
 }
 
-export function useEventLog() {
-  return useGameStore((s) => s.state?.eventLog ?? []);
+export function useEventLog(): GameEvent[] {
+  return useGameStore((s) => s.state?.eventLog ?? EMPTY_EVENTS);
 }
 
 export function useRound(): number {

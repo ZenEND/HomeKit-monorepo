@@ -47,7 +47,8 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   handleConnection(client: Socket): void {
     this.socketMap.set(client.id, { playerId: client.id, roomId: null });
-    this.logger.debug(`Connected: ${client.id}`);
+    const totalConnected = this.socketMap.size;
+    this.logger.log(`[CONNECT] socket=${client.id} ip=${client.handshake.address} total=${totalConnected}`);
   }
 
   async handleDisconnect(client: Socket): Promise<void> {
@@ -60,7 +61,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       });
     }
     this.socketMap.delete(client.id);
-    this.logger.debug(`Disconnected: ${client.id}`);
+    this.logger.log(`[DISCONNECT] socket=${client.id} playerId=${meta?.playerId} roomId=${meta?.roomId ?? 'none'} total=${this.socketMap.size}`);
     await this.broadcastRooms();
   }
 
@@ -71,6 +72,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() client: Socket,
     @MessageBody() data: { playerId: string; playerName: string; pluginId?: string; settings?: Record<string, unknown> },
   ) {
+    this.logger.log(`[CREATE_ROOM] socket=${client.id} playerId=${data.playerId} playerName=${data.playerName} plugin=${data.pluginId ?? 'munchkin'}`);
     try {
       const info = await this.roomManager.createRoom(
         data.playerId,
@@ -83,8 +85,10 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       await this.redis.heartbeat(info.roomId, data.playerId);
       this.subscribeRoomEvents(info.roomId);
       client.emit('ROOM_CREATED', { roomId: info.roomId, roomCode: info.roomCode, info });
+      this.logger.log(`[CREATE_ROOM] success roomId=${info.roomId} roomCode=${info.roomCode}`);
       await this.broadcastRooms();
     } catch (err) {
+      this.logger.error(`[CREATE_ROOM] failed socket=${client.id} error=${(err as Error).message}`);
       client.emit('ERROR', { code: 'CREATE_ROOM_FAILED', message: (err as Error).message });
     }
   }
@@ -94,6 +98,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() client: Socket,
     @MessageBody() data: { roomCode: string; playerId: string; playerName: string },
   ) {
+    this.logger.log(`[JOIN_ROOM] socket=${client.id} playerId=${data.playerId} roomCode=${data.roomCode}`);
     try {
       const info = await this.roomManager.joinRoom(data.roomCode, data.playerId, data.playerName);
       this.socketMap.set(client.id, { playerId: data.playerId, roomId: info.roomId });
@@ -107,8 +112,10 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
         playerName: data.playerName,
         info,
       });
+      this.logger.log(`[JOIN_ROOM] success socket=${client.id} roomId=${info.roomId}`);
       await this.broadcastRooms();
     } catch (err) {
+      this.logger.error(`[JOIN_ROOM] failed socket=${client.id} roomCode=${data.roomCode} error=${(err as Error).message}`);
       client.emit('ERROR', { code: 'JOIN_FAILED', message: (err as Error).message });
     }
   }
@@ -258,11 +265,14 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('LIST_ROOMS')
   async handleListRooms(@ConnectedSocket() client: Socket) {
     const rooms = await this.roomManager.getOpenRooms();
+    this.logger.log(`[LIST_ROOMS] socket=${client.id} → sending ${rooms.length} room(s)`);
     client.emit('ROOMS_LIST', { rooms });
   }
 
   private async broadcastRooms(): Promise<void> {
     const rooms = await this.roomManager.getOpenRooms();
+    const nsConnected = this.socketMap.size;
+    this.logger.log(`[BROADCAST_ROOMS] sending ROOMS_UPDATED with ${rooms.length} room(s) to ${nsConnected} socket(s) in /game namespace`);
     this.server.emit('ROOMS_UPDATED', { rooms });
   }
 
@@ -292,8 +302,8 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
         if (event.type === 'STATE_PATCH') {
           const p = event.payload as { patch: unknown[]; phase: string; round: number };
           // Only forward if there are sockets for this room in our instance
-          const roomSockets = this.server.sockets.adapter.rooms?.get(roomId);
-          if (roomSockets && roomSockets.size > 0) {
+          const roomSockets = [...this.socketMap.values()].filter((m) => m.roomId === roomId);
+          if (roomSockets.length > 0) {
             this.server.to(roomId).emit('STATE_PATCH_REMOTE', p);
           }
         }

@@ -192,7 +192,10 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
   // ── Room Info (metadata) ────────────────────────────────────────────────────
 
   async setRoomInfo<T>(roomId: string, info: T): Promise<void> {
-    await this.client.setex(Keys.info(roomId), ROOM_TTL_S, JSON.stringify(info));
+    const pipeline = this.client.pipeline();
+    pipeline.setex(Keys.info(roomId), ROOM_TTL_S, JSON.stringify(info));
+    pipeline.sadd(Keys.activeRooms(), roomId);
+    await pipeline.exec();
   }
 
   async getRoomInfo<T>(roomId: string): Promise<T | null> {

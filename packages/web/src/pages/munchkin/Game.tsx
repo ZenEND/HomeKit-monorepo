@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { AnimatePresence, motion } from 'motion/react';
 import { useUserStore } from '@/store/useUserStore';
@@ -31,18 +31,20 @@ export default function Game() {
   const [levelUpPlayer, setLevelUpPlayer] = useState<string | null>(null);
   const [activeEffect, setActiveEffect] = useState<AnimationTrigger | null>(null);
 
+  const handleAnimationTrigger = useCallback((trigger: AnimationTrigger) => {
+    setActiveEffect(trigger);
+    if (trigger.type === 'level_up') {
+      setLevelUpPlayer(trigger.targetPlayerId ?? null);
+      setTimeout(() => setLevelUpPlayer(null), 2500);
+    }
+    setTimeout(() => setActiveEffect(null), 2000);
+  }, []);
+
   const { sendAction, reconnect } = useGameSocket({
     roomId,
     playerId: myPlayerId,
     playerName,
-    onAnimationTrigger: (trigger) => {
-      setActiveEffect(trigger);
-      if (trigger.type === 'level_up') {
-        setLevelUpPlayer(trigger.targetPlayerId ?? null);
-        setTimeout(() => setLevelUpPlayer(null), 2500);
-      }
-      setTimeout(() => setActiveEffect(null), 2000);
-    },
+    onAnimationTrigger: handleAnimationTrigger,
   });
 
   const state = useGameStore((s) => s.state);
